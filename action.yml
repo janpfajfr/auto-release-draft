@@ -1,8 +1,9 @@
 name: 'Auto Release Draft'
 description: 'Drafts a GitHub release with the changes introduced by a newly created version tag'
 author: 'Jan Pfajfr'
-  outputs:
-    release-url: 'The URL of the Github release that was drafted'
+outputs:
+  release-url: 
+    description: 'The URL of the Github release that was drafted'
 runs:
   using: 'node12'
   main: 'dist/index.js'
