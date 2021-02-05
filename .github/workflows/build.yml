@@ -15,9 +15,7 @@ jobs:
       - name: Get the sources
         uses: actions/checkout@v2
       - name: Restore the dependencies
-        run: |
-            export CONFIG_CLIENT_ID=${{secrets.CONFIG_CLIENT_ID}};
-            yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile
       - name: Build
         run: yarn all
           
