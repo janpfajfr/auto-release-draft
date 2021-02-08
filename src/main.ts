@@ -8,6 +8,7 @@ export async function run(): Promise<void> {
   try {
     const token = core.getInput('repo-token')
     const tag = event.getCreatedTag()
+    console.log(tag)
     let releaseUrl = ''
 
     if (tag && version.isSemver(tag)) {
