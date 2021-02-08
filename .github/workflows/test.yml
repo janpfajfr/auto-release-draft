@@ -20,7 +20,9 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN}}
       - name: Print URL of the release draft
-        run: |
-         echo ${{ steps.create-release-draft.ouputs}}
-         echo ${{ steps.create-release-draft.ouputs.release-url}}
+        run: |      
+          echo ${{ github.context}}
+          echo ${{ github.context.payload}}      
+          echo ${{ steps.create-release-draft.ouputs}}
+          echo ${{ steps.create-release-draft.ouputs.release-url}}
 
