@@ -3,18 +3,17 @@ on:
   push:
     branches:
       - main
-
 jobs:
   build:
     name: Build and Test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os:  [ubuntu-latest]
+        os: [windows-latest, ubuntu-latest]
     steps:
       - name: Get the sources
-        uses: actions/checkout@v2
+        uses: actions/checkout@v1
       - name: Restore the dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile 
       - name: Build
-        run: yarn all
+        run: yarn run all

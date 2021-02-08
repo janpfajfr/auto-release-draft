@@ -39,7 +39,7 @@ function getCreatedTag() {
         core.info('The created reference was a branch, not a tag');
         return null;
     }
-    return github.context.payload.ref_path;
+    return github.context.payload.ref;
 }
 exports.getCreatedTag = getCreatedTag;
 
@@ -81,9 +81,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getCommitMessagesFrom = exports.getCommitMessagesBetween = exports.getPreviousVersionTag = exports.getChangesIntroducedByTag = void 0;
-const exec_1 = __webpack_require__(1514);
 const core = __importStar(__webpack_require__(2186));
-// import {core} from '@actions/core'
+const exec_1 = __webpack_require__(1514);
 function getChangesIntroducedByTag(tag) {
     return __awaiter(this, void 0, void 0, function* () {
         const previousVersionTag = yield getPreviousVersionTag(tag);
@@ -111,9 +110,9 @@ function getPreviousVersionTag(tag) {
             'v[0-9]*',
             '--abbrev=0',
             '--first-parent',
-            `${tag}^`
+            `${tag}^` // Starts looking from the parent of the specified tag
         ], options);
-        core.debug(`The previous tag is ${previousTag}`);
+        core.debug(`The previous version tag is ${previousTag}`);
         return exitCode === 0 ? previousTag.trim() : null;
     });
 }
@@ -129,8 +128,12 @@ function getCommitMessagesBetween(firstTag, secondTag) {
             },
             silent: true
         };
-        yield exec_1.exec('git', ['log', '--format=%S', `${firstTag}..${secondTag}`], options);
-        core.debug(`The commit messages betweem ${firstTag} and ${secondTag}`);
+        yield exec_1.exec('git', [
+            'log',
+            '--format=%s',
+            `${firstTag}..${secondTag}` // Includes the commits reachable from 'secondTag' but not 'firstTag'
+        ], options);
+        core.debug(`The commit messages between ${firstTag} and ${secondTag} are:\n${commitMessages}`);
         return commitMessages.trim();
     });
 }
@@ -146,7 +149,11 @@ function getCommitMessagesFrom(tag) {
             },
             silent: true
         };
-        yield exec_1.exec('git', ['log', '--format=%S', tag], options);
+        yield exec_1.exec('git', [
+            'log',
+            '--format=%s',
+            tag // Includes the commits reachable from the specified tag
+        ], options);
         core.debug(`The commit messages from ${tag} are:\n${commitMessages}`);
         return commitMessages.trim();
     });
@@ -204,10 +211,11 @@ function createReleaseDraft(versionTag, repoToken, changeLog) {
             tag_name: versionTag,
             name: version.removePrefix(versionTag),
             body: markdown.toUnorderedList(changeLog),
+            prerelease: version.isPrerelease(versionTag),
             draft: true
         });
         if (response.status !== 201) {
-            throw new Error(`Failed to create the release ${response.status}`);
+            throw new Error(`Failed to create the release: ${response.status}`);
         }
         core.info(`Created release draft ${response.data.name}`);
         return response.data.html_url;
@@ -264,7 +272,7 @@ function run() {
             const token = core.getInput('repo-token');
             const tag = event.getCreatedTag();
             let releaseUrl = '';
-            if (tag && version.isSemver(tag)) {
+            if (tag && version.isSemVer(tag)) {
                 const changelog = yield git.getChangesIntroducedByTag(tag);
                 releaseUrl = yield github.createReleaseDraft(tag, token, changelog);
             }
@@ -324,12 +332,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.removePrefix = exports.isPrerelease = exports.isSemver = void 0;
+exports.removePrefix = exports.isPrerelease = exports.isSemVer = void 0;
 const semver = __importStar(__webpack_require__(1383));
-function isSemver(version) {
+function isSemVer(version) {
     return semver.valid(version) !== null;
 }
-exports.isSemver = isSemver;
+exports.isSemVer = isSemVer;
 function isPrerelease(version) {
     return semver.prerelease(version) !== null;
 }

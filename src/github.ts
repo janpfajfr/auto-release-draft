@@ -16,12 +16,15 @@ export async function createReleaseDraft(
     tag_name: versionTag,
     name: version.removePrefix(versionTag),
     body: markdown.toUnorderedList(changeLog),
+    prerelease: version.isPrerelease(versionTag),
     draft: true
   })
+
   if (response.status !== 201) {
-    throw new Error(`Failed to create the release ${response.status}`)
+    throw new Error(`Failed to create the release: ${response.status}`)
   }
 
   core.info(`Created release draft ${response.data.name}`)
+
   return response.data.html_url
 }

@@ -10,19 +10,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os:  [ubuntu-latest]
+        os: [windows-latest, ubuntu-latest]    
     steps:
       - name: Get the sources
-        uses: actions/checkout@v2
+        uses: actions/checkout@v1
       - name: Create a release draft for a version tag
         id: create-release-draft
         uses: ./
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN}}
-      - name: Print URL of the release draft
-        run: |      
-          echo ${{ github.context}}
-          echo ${{ github.context.payload}}      
-          echo ${{ steps.create-release-draft.ouputs}}
-          echo ${{ steps.create-release-draft.ouputs.release-url}}
-
+          repo-token: ${{ secrets.GITHUB_TOKEN  }}
+      - name: Print the URL of the release draft
+        if: steps.create-release-draft.outputs.release-url != ''
+        run: echo ${{ steps.create-release-draft.outputs.release-url }}
